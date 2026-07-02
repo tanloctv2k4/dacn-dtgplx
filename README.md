@@ -1,0 +1,1 @@
+Ứng dụng ASP.NET Core MVC hỗ trợ luyện thi lý thuyết, mô phỏng tình huống giao thông, quản lý khóa học, thuê xe tập lái và thanh toán trực tuyến cho trung tâm đào tạo lái xe. Hệ thống cung cấp trang người học, giáo viên, quản trị, cùng chatbot hỗ trợ và các tiện ích báo cáo.
