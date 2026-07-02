@@ -1,0 +1,1085 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - DT GPLX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --primary-dark: #1557b0;
+            --secondary-color: #5f6368;
+            --background-light: #f8f9fa;
+            --border-color: #e0e0e0;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-light);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-dark);
+            padding-top: 70px;
+            line-height: 1.6;
+        }
+
+        /* ========================= NAVBAR ========================= */
+        .navbar {
+            background: var(--white);
+            padding: 0;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--primary-color) !important;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .navbar-brand img {
+                height: 40px;
+                width: 40px;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+
+        .navbar .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 24px 16px !important;
+            transition: color 0.2s ease, background-color 0.2s ease;
+            position: relative;
+        }
+
+            .navbar .nav-link:hover {
+                color: var(--primary-color) !important;
+                background-color: rgba(26, 115, 232, 0.04);
+            }
+
+            .navbar .nav-link.active {
+                color: var(--primary-color) !important;
+            }
+
+                .navbar .nav-link.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background-color: var(--primary-color);
+                }
+
+            .navbar .nav-link i {
+                font-size: 0.9rem;
+                margin-right: 6px;
+            }
+
+        /* Dropdown */
+        .dropdown-menu {
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            border-radius: 8px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+
+        .navbar .dropdown {
+            position: relative !important;
+        }
+
+        .navbar .dropdown-menu-center {
+            min-width: 200px;
+            padding: 6px 0;
+            margin-top: -15px !important;
+            transform: translateX(-10px) !important;
+            border-radius: 12px !important;
+        }
+
+            .navbar .dropdown-menu-center .dropdown-item {
+                padding: 8px 14px;
+                font-size: 0.9rem;
+            }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            transition: background-color 0.2s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: rgba(26, 115, 232, 0.08);
+                color: var(--primary-color);
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                color: var(--text-light);
+            }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+        }
+
+            .search-box input {
+                width: 240px;
+                padding: 8px 16px;
+                border: 1px solid var(--border-color);
+                border-radius: 24px;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+                background-color: var(--background-light);
+            }
+
+                .search-box input:focus {
+                    width: 300px;
+                    outline: none;
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+                    background-color: var(--white);
+                }
+
+            .search-box button {
+                position: absolute;
+                right: 4px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 32px;
+                height: 32px;
+                border: none;
+                background-color: var(--primary-color);
+                color: var(--white);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.2s ease;
+            }
+
+                .search-box button:hover {
+                    background-color: var(--primary-dark);
+                }
+
+        /* User Section */
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .user-name {
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            background-color: var(--white);
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+
+            .btn-logout:hover {
+                background-color: var(--background-light);
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
+
+        .btn-login,
+        .btn-register {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-login {
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            background-color: var(--white);
+        }
+
+            .btn-login:hover {
+                background-color: rgba(26, 115, 232, 0.08);
+            }
+
+        .btn-register {
+            color: var(--white);
+            background-color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+            .btn-register:hover {
+                background-color: var(--primary-dark);
+            }
+
+        /* ========================= MAIN CONTENT ========================= */
+        main {
+            min-height: calc(100vh - 70px - 300px);
+        }
+
+        /* ========================= FOOTER ========================= */
+        footer {
+            background: var(--white);
+            margin-top: 60px;
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0 0;
+        }
+
+            footer h6 {
+                font-weight: 600;
+                font-size: 1rem;
+                color: var(--text-dark);
+                margin-bottom: 20px;
+            }
+
+            footer p,
+            footer li {
+                font-size: 0.9rem;
+                color: var(--text-light);
+                line-height: 1.8;
+            }
+
+            footer a {
+                color: var(--text-light);
+                text-decoration: none;
+                transition: color 0.2s ease;
+            }
+
+                footer a:hover {
+                    color: var(--primary-color);
+                }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+            .social-links a {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background-color: var(--background-light);
+                color: var(--text-dark);
+                transition: all 0.2s ease;
+            }
+
+                .social-links a:hover {
+                    background-color: var(--primary-color);
+                    color: var(--white);
+                }
+
+        .footer-bottom {
+            background: var(--background-light);
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+            .footer-bottom p {
+                margin: 0;
+                font-size: 0.85rem;
+            }
+
+        /* ========================= RESPONSIVE ========================= */
+        @@media (max-width: 991px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .navbar .nav-link {
+                padding: 12px 16px !important;
+            }
+
+                .navbar .nav-link.active::after {
+                    display: none;
+                }
+
+            .search-box {
+                margin: 16px 0;
+            }
+
+                .search-box input {
+                    width: 100%;
+                }
+
+                    .search-box input:focus {
+                        width: 100%;
+                    }
+
+            .user-section {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+                .navbar-brand img {
+                    height: 32px;
+                    width: 32px;
+                }
+
+            .user-name {
+                display: none;
+            }
+
+            footer {
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .navbar .navbar-nav {
+            margin-right: 40px !important;
+        }
+
+        .user-section {
+            margin-left: 20px !important;
+        }
+
+        .navbar .container-fluid {
+            padding-right: 8px;
+            padding-left: 16px;
+        }
+
+        .navbar .container {
+            padding-right: 8px !important;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- ========================= NAVBAR ========================= -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid px-3">
+            <!-- Logo -->
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <img src="~/images/Logo/logo.jpg" alt="Logo" />
+                <span>DT GPLX</span>
+            </a>
+            <!-- Mobile toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Left menu -->
+                @{
+                    int roleId = Context.Session.GetInt32("RoleId") ?? 0;
+                    bool isLogin = Context.Session.GetInt32("UserId") != null;
+                }
+
+                <ul class="navbar-nav me-auto">
+
+                    <!-- ALWAYS SHOW: TRANG CHỦ -->
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" &&
+                                                       ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                           asp-controller="Home" asp-action="Index">
+                            <i class="fa-solid fa-house"></i> Trang chủ
+                        </a>
+                    </li>
+
+                    <!-- ========================= -->
+                    <!-- 0️⃣ USER CHƯA ĐĂNG NHẬP -->
+                    <!-- ========================= -->
+                    @if (!isLogin)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Hoc" asp-action="Index">
+                                <i class="fa-solid fa-file-lines"></i> Tài liệu
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="KhoaHoc" asp-action="Index">
+                                <i class="fa-solid fa-list"></i> Danh sách khóa học
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="ThueXe" asp-action="Index">
+                                <i class="fa-solid fa-car-side"></i> Thuê xe
+                            </a>
+                        </li>
+                    }
+                    <!-- ========================= -->
+                    <!-- 2️⃣ ROLE: HỌC VIÊN (RoleId = 2) -->
+                    <!-- ========================= -->
+                    @if (roleId == 2)
+                    {
+                        <!-- Hồ sơ -->
+                        <li class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-user"></i> Hồ sơ
+                            </a>
+                            <ul class="dropdown-menu shadow border-0 rounded-4 dropdown-menu-center">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="HoSoThiSinh" asp-action="MyProfile">
+                                        <i class="fa-solid fa-id-card me-2"></i> Hồ sơ của tôi
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="HoSoThiSinh" asp-action="Create">
+                                        <i class="fa-solid fa-user-plus me-2"></i> Thêm mới hồ sơ
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Học tập -->
+                        <li class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-graduation-cap"></i> Học tập
+                            </a>
+                            <ul class="dropdown-menu shadow border-0 rounded-4 dropdown-menu-center">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Hoc" asp-action="Index">
+                                        <i class="fa-solid fa-file-lines me-2"></i> Tài liệu
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+
+                                <li>
+                                    <a class="dropdown-item" asp-controller="KhoaHoc" asp-action="Index">
+                                        <i class="fa-solid fa-list me-2"></i> Danh sách khóa học
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" asp-controller="KhoaHoc" asp-action="MyCourses">
+                                        <i class="fa-solid fa-book-open me-2"></i> Khóa học của tôi
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="ThueXe" asp-action="Index">
+                                <i class="fa-solid fa-car-side"></i> Thuê xe
+                            </a>
+                        </li>
+                    }
+
+                    <!-- ========================= -->
+                    <!-- 3️⃣ ROLE: GIÁO VIÊN (RoleId = 3) -->
+                    <!-- ========================= -->
+                    @if (roleId == 3)
+                    {
+                        <!-- Học tập -->
+                        <li class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-graduation-cap"></i> Tài liệu Học tập
+                            </a>
+                            <ul class="dropdown-menu shadow border-0 rounded-4 dropdown-menu-center">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Hoc" asp-action="Index">
+                                        <i class="fa-solid fa-file-lines me-2"></i> Tài liệu
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="KhoaHoc" asp-action="Index">
+                                        <i class="fa-solid fa-list me-2"></i> Danh sách khóa học
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="QLKhoaHocGV" asp-action="Index">
+                                        <i class="fa-solid fa-book-open me-2"></i> Khóa học của tôi
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="ThueXe" asp-action="Index">
+                                <i class="fa-solid fa-car-side"></i> Thuê xe
+                            </a>
+                        </li>
+                    }
+
+                    <!-- ========================= -->
+                    <!-- TRUNG TÂM (ALL ROLES) -->
+                    <!-- ========================= -->
+                    <li class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-building"></i> Trung tâm
+                        </a>
+                        <ul class="dropdown-menu shadow border-0 rounded-4 dropdown-menu-center">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="About">
+                                    <i class="fa-solid fa-building me-2"></i> Giới thiệu
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="Contact">
+                                    <i class="fa-solid fa-phone me-2"></i> Liên hệ
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="FAQ">
+                                    <i class="fa-solid fa-circle-question me-2"></i> FAQ
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+                <div class="d-flex align-items-center ms-auto">
+                    <!-- SEARCH -->
+                    <div class="search-box position-relative me-4">
+                        <input type="search" id="featureSearch"
+                               placeholder="Tìm chức năng..."
+                               autocomplete="off" />
+
+                        <div id="searchResult"
+                             class="position-absolute bg-white shadow rounded-3 d-none"
+                             style="top:110%; width:100%; z-index:1000;">
+                        </div>
+                    </div>
+                    <!-- Notification Bell -->
+                    @if (Context.Session.GetString("Username") != null)
+                    {
+                        <div class="nav-item dropdown me-3">
+                            <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" onclick="loadNotifications()">
+                                <i class="fa-solid fa-bell fa-lg"></i>
+                                <span id="notificationBadge"
+                                      class="position-absolute badge rounded-pill bg-danger d-flex align-items-center justify-content-center"
+                                      style="top: 2px; right: 4px; min-width: 20px; height: 20px; font-size: 0.75rem;">
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 420px; overflow-y: auto;">
+                                <li class="px-3 py-2 d-flex justify-content-between align-items-center">
+                                    <strong>Thông báo</strong>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-success" onclick="markAllAsRead()">
+                                            <i class="fa fa-check-double"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshNotifications()">
+                                            <i class="fa fa-rotate"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <div id="notificationList" style="max-height: 300px; overflow-y: auto;">
+                                    <p class="text-center text-muted small py-3">Đang tải...</p>
+                                </div>
+                                <li>
+                                    <a class="dropdown-item text-center text-primary"
+                                       asp-controller="Notification"
+                                       asp-action="Index">
+                                        <i class="fa fa-list-ul me-1"></i> Xem tất cả thông báo
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    <!-- AUTH -->
+                    <div class="user-section">
+                        @if (Context.Session.GetString("Username") != null)
+                        {
+                            var fullName = Context.Session.GetString("FullName")
+                            ?? Context.Session.GetString("Username");
+                            var avatar = Context.Session.GetString("Avatar");
+                            var avatarSrc = !string.IsNullOrWhiteSpace(avatar)
+                            ? Url.Content(avatar)
+                            : Url.Content("~/images/avatar/default.png");
+                            <div class="dropdown">
+                                <a class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <img src="@avatarSrc" class="user-avatar" />
+
+                                    <div class="d-flex flex-column align-items-start">
+                                        <span class="user-name">@fullName</span>
+
+                                        @{
+                                            var role = Context.Session.GetString("Role");
+                                            var roleClass = "bg-secondary"; // màu mặc định
+
+                                            if (role == "Giáo viên")
+                                            {
+                                                roleClass = "bg-primary";
+                                            }
+                                            else if (role == "Học viên")
+                                            {
+                                                roleClass = "bg-success";
+                                            }
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(role))
+                                        {
+                                            <span class="badge text-white @roleClass" style="font-size: 0.75rem;">
+                                                @role
+                                            </span>
+                                        }
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Dashboard">
+                                            <i class="fa-solid fa-gauge-high me-2"></i>Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                            <i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa thông tin
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
+                                            <i class="fa-solid fa-gear me-2"></i>Cài đặt
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="ThoiKhoaBieu"
+                                           asp-action="Index">
+                                            <i class="fa-solid fa-calendar-days me-2"></i> Thời khóa biểu
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Chatbot"
+                                           asp-action="Index">
+                                            <i class="fa-solid fa-robot me-2"></i> Chatbot GPLX
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="HoaDonThanhToan"
+                                           asp-action="Index">
+                                            <i class="fa-solid fa-file-invoice-dollar me-2"></i> Hóa đơn của tôi
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li class="position-relative">
+                                        <a class="dropdown-item d-flex align-items-center"
+                                           asp-controller="Message" asp-action="Conversations">
+                                            <i class="fa-regular fa-comments me-2"></i> Tin nhắn
+
+                                            <!-- Badge số tin nhắn chưa đọc -->
+                                            <span id="messageUnreadBadge"
+                                                  class="badge bg-danger rounded-pill ms-auto d-none"
+                                                  style="font-size: 0.75rem; padding: 4px 8px;">
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" asp-controller="Auth" asp-action="Logout">
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="btn btn-login me-2" asp-controller="Auth" asp-action="Login">
+                                <i class="fa fa-right-to-bracket me-1"></i>Đăng nhập
+                            </a>
+
+                            <a class="btn btn-register" asp-controller="Auth" asp-action="Register">
+                                <i class="fa fa-user-plus me-1"></i>Đăng ký
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========================= MAIN CONTENT ========================= -->
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <!-- ========================= FOOTER ========================= -->
+    <footer>
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-4 mb-4">
+                    <h6>DT GPLX</h6>
+                    <p>
+                        Nền tảng đào tạo lái xe chuyên nghiệp, hiện đại,
+                        mang đến trải nghiệm học tập tốt nhất cho học viên.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" aria-label="Zalo"><i class="fa-solid fa-comments"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6>Liên kết nhanh</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Điều khoản sử dụng</a></li>
+                        <li class="mb-2"><a href="#">Chính sách bảo mật</a></li>
+                        <li class="mb-2"><a href="#">Hướng dẫn đăng ký</a></li>
+                        <li class="mb-2"><a href="#">Hỗ trợ học viên</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6>Liên hệ</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fa fa-envelope me-2"></i>
+                            support@dtgplx.vn
+                        </li>
+                        <li class="mb-2">
+                            <i class="fa fa-phone me-2"></i>
+                            0123 456 789
+                        </li>
+                        <li class="mb-2">
+                            <i class="fa fa-location-dot me-2"></i>
+                            123 Nguyễn Văn Cừ, Q.5, TP.HCM
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row align-items-center">
+                    <!-- Cột trái: Bản quyền -->
+                    <div class="col-md-6 mb-2 mb-md-0 text-center text-md-start">
+                        <p>© @DateTime.Now.Year DT GPLX. Bản quyền thuộc về trung tâm.</p>
+                    </div>
+                    <!-- Cột phải: Online + Team Hải Lộc trên cùng 1 hàng -->
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
+                            <!-- Khối online -->
+                            @if (Context.Session.GetString("Username") != null)
+                            {
+                                <div class="text-center">
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <i class="fa fa-circle text-success"></i>
+                                        <span id="onlineNumber">0 người đang online</span>
+                                        <!-- Online users dropdown -->
+                                        <button class="btn btn-light btn-sm border" data-bs-toggle="dropdown">
+                                            <i class="fa fa-users"></i>
+                                        </button>
+                                        <ul class="dropdown-menu shadow" style="width: 260px;">
+                                            <li class="px-3 py-2 d-flex justify-content-between align-items-center">
+                                                <strong>Người dùng đang online</strong>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="loadOnlineUsers()">
+                                                    <i class="fa fa-rotate"></i>
+                                                </button>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <div id="onlineUsersList" style="max-height: 250px; overflow-y: auto;">
+                                                <p class="text-center text-muted small py-3">Đang tải...</p>
+                                            </div>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li class="text-center text-muted small py-2">
+                                                Tự động cập nhật mỗi 30 giây
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                            <!-- Text Team Hải Lộc (nằm sát bên phải khối online) -->
+                            <p class="mb-0 text-muted">
+                                Phát triển bởi <strong>Team Hải Lộc nè!!!</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Toastr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    @RenderSection("Scripts", required: false)
+    @await Html.PartialAsync("_Toast")
+    <script>
+        // Load số thông báo chưa đọc
+        function loadUnreadCount() {
+            fetch('/Notification/CountUnread')
+                .then(res => res.json())
+                .then(count => {
+                    const badge = document.getElementById("notificationBadge");
+
+                    if (count > 0) {
+                        badge.classList.remove("d-none");
+                        badge.innerText = count;
+                    } else {
+                        badge.classList.add("d-none");
+                    }
+                });
+        }
+
+        setInterval(loadUnreadCount, 5000);
+        loadUnreadCount();
+
+        function loadNotifications() {
+            fetch('/Notification/GetNotifications')
+                .then(res => res.json())
+                .then(result => {
+                    const box = document.getElementById("notificationList");
+
+                    if (!result.success || result.data.length === 0) {
+                        box.innerHTML = `
+                            <p class="text-center text-muted small py-3">Không có thông báo nào.</p>
+                        `;
+                        return;
+                    }
+
+                    let html = "";
+                    result.data.forEach(n => {
+
+                        // Tạo html cho cụm nút, chỉ thêm nút "đã đọc" nếu DaXem = false
+                        let actionsHtml = `
+                            <button class="btn btn-sm btn-outline-danger" title="Xóa"
+                                    onclick="deleteNotification(${n.thongBaoId})">
+                                <i class="fa fa-trash"></i>
+                            </button>`;
+
+                        if (!n.daXem) {   // đã xem rồi thì không thêm nút check
+                            actionsHtml =
+                                `<button class="btn btn-sm btn-outline-success" title="Đánh dấu đã xem"
+                                         onclick="markAsRead(${n.thongBaoId})">
+                                    <i class="fa fa-check"></i>
+                                </button>` + actionsHtml;
+                        }
+
+                        html += `
+                            <div class="px-3 py-2 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+
+                                    <div>
+                                        <strong>${n.tieuDe}</strong>
+                                        <p class="small text-muted mb-1">${n.noiDung}</p>
+                                        <span class="small text-secondary">
+                                            ${new Date(n.thoiGianGui).toLocaleString('vi-VN')}
+                                        </span>
+                                    </div>
+
+                                    <div class="ms-2 d-flex flex-column align-items-center gap-2" style="white-space: nowrap;">
+                                        ${actionsHtml}
+                                    </div>
+
+                                </div>
+                            </div>`;
+                    });
+                    box.innerHTML = html;
+                });
+        }
+
+        function refreshNotifications() {
+            loadNotifications();
+            loadUnreadCount();
+        }
+
+        function markAllAsRead() {
+            fetch('/Notification/MarkAllAsRead', { method: 'POST' })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        loadUnreadCount();
+                        loadNotifications();
+                        toastr.success("Đã đánh dấu tất cả thông báo.");
+                    }
+                });
+        }
+
+        function markAsRead(id) {
+            fetch('/Notification/MarkAsRead/' + id, { method: 'POST' })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        loadUnreadCount();
+                        loadNotifications();
+                    }
+                });
+        }
+
+        function deleteNotification(id) {
+            if (!confirm("Xóa thông báo này?")) return;
+
+            fetch('/Notification/Delete/' + id, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        loadUnreadCount();
+                        loadNotifications();
+                        toastr.success("Đã xóa thông báo.");
+                    }
+                });
+        }
+
+        // ========================= ONLINE CHECK =========================
+
+        // 1) Ping user mỗi 5 giây để báo đang online
+        function pingOnline() {
+            fetch('/online/ping');
+        }
+
+        setInterval(pingOnline, 5000);
+        pingOnline();
+
+
+        // 2) Lấy số người online
+        function loadOnlineCount() {
+            fetch('/online/count')
+                .then(res => res.json())
+                .then(result => {
+                    document.getElementById("onlineNumber").innerText =
+                        result.count + " người đang online";
+                });
+        }
+        setInterval(loadOnlineCount, 5000);
+        loadOnlineCount();
+
+
+        // 3) Lấy danh sách người online (dropdown)
+        function loadOnlineUsers() {
+            fetch('/online/users')
+                .then(res => res.json())
+                .then(result => {
+                    const box = document.getElementById("onlineUsersList");
+
+                    if (!result.success || result.data.length === 0) {
+                        box.innerHTML = `
+                            <p class="text-center text-muted small py-3">
+                                Không có ai đang online
+                            </p>`;
+                        return;
+                    }
+
+                    let html = "";
+                    result.data.forEach(u => {
+                        html += `
+                            <div class="d-flex align-items-center px-3 py-2 border-bottom">
+                                <img src="${u.avatar}"
+                                     class="rounded-circle me-2"
+                                     style="width: 32px; height: 32px; object-fit: cover;">
+
+                                <div>
+                                    <strong>${u.fullName}</strong>
+                                    <p class="small text-muted mb-0">${u.email}</p>
+                                </div>
+
+                                <span class="small text-success ms-auto">
+                                    ● Online
+                                </span>
+                            </div>
+                        `;
+                    });
+
+                    box.innerHTML = html;
+                });
+        }
+
+        function loadUnreadMessages() {
+            fetch('/Conversation/CountUnread')
+                .then(res => res.json())
+                .then(count => {
+                    const badge = document.getElementById('messageBadge');
+                    if (!badge) return;
+
+                    if (count > 0) {
+                        badge.classList.remove('d-none');
+                        badge.innerText = count;
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                });
+        }
+
+        const input = document.getElementById("featureSearch");
+        const box = document.getElementById("searchResult");
+
+        input.addEventListener("input", async () => {
+            const q = input.value.trim();
+            if (q.length < 2) {
+                box.classList.add("d-none");
+                box.innerHTML = "";
+                return;
+            }
+
+            const res = await fetch(`/search/features?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.length === 0) {
+                box.innerHTML = `<div class="p-3 text-muted">Không tìm thấy chức năng</div>`;
+                box.classList.remove("d-none");
+                return;
+            }
+
+            const regex = new RegExp(`(${q})`, "gi");
+
+            box.innerHTML = data.map(f => `
+                <a href="${f.url}"
+                   class="d-block px-3 py-2 text-decoration-none text-dark border-bottom search-item">
+                    <div class="fw-semibold">
+                        ${f.title.replace(regex, `<mark>$1</mark>`)}
+                    </div>
+                    <div class="small text-muted">
+                        ${f.description.replace(regex, `<mark>$1</mark>`)}
+                    </div>
+                </a>
+            `).join("");
+
+            box.classList.remove("d-none");
+        });
+
+    </script>
+
+</body>
+</html>

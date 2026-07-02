@@ -1,0 +1,385 @@
+﻿@{
+    ViewBag.Title = "Khóa học";
+    var hangs = ViewBag.Hangs as List<dacn_dtgplx.Models.Hang>;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+@if (ViewBag.NoHoSoWarning == true)
+{
+    <div class="alert alert-info d-flex align-items-center shadow-sm mt-2"
+         style="border-left: 6px solid #0d6efd;">
+        <i class="fa-solid fa-circle-info me-3 fa-lg"></i>
+        <div>
+            <strong>Bạn chưa có hồ sơ học viên.</strong><br />
+            Vui lòng tạo hồ sơ trước khi đăng ký khóa học để hệ thống có thể đề xuất khóa phù hợp.
+            <a href="/HoSoThiSinh/Create" class="fw-bold text-primary ms-1">
+                Tạo hồ sơ ngay →
+            </a>
+        </div>
+    </div>
+}
+
+<style>
+
+    /* -------- MAIN LAYOUT (SIDEBAR + CONTENT) ---------- */
+    .course-layout {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 25px;
+    }
+
+    /* -------- SIDEBAR FILTER -------- */
+    .filter-box {
+        background: #fff;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        height: fit-content;
+        position: sticky;
+        top: 120px;
+    }
+
+    .filter-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .filter-box label {
+        font-weight: 600;
+        margin-top: 12px;
+    }
+
+    /* -------- COURSE CARDS -------- */
+    .course-card {
+        border-radius: 12px;
+        background: #fff;
+        padding: 18px;
+        border: 1px solid #e8eaed;
+        box-shadow: 0 2px 6px rgba(0,0,0,.05);
+        transition: .25s ease;
+        position: relative;
+    }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.12);
+        }
+
+    /* --- HỌC PHÍ HIỆN Ở BÊN PHẢI (KHUNG ĐỎ) --- */
+    .price-overlay {
+        position: absolute;
+        top: 48px; /* đặt ngang hàng với "Hạng" */
+        right: 12px; /* sát mép phải card */
+
+        background: #0d6efd;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: .25s ease;
+    }
+
+    .course-card:hover .price-overlay {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 46px;
+        height: 24px;
+    }
+
+        .toggle-switch input {
+            position: absolute;
+            opacity: 0;
+            width: 46px; /* full width của toggle */
+            height: 24px;
+            cursor: pointer;
+            z-index: 2; /* input nằm trên slider */
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        border-radius: 34px;
+        transition: .3s;
+    }
+
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #0d6efd; /* xanh bootstrap */
+    }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+</style>
+
+
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4 text-primary">
+        🎓 Danh sách khóa học đang mở
+    </h2>
+
+    <div class="course-layout">
+
+        <!-- ================= SIDEBAR FILTER ================= -->
+        <div class="filter-box">
+
+            <div class="filter-title">
+                <i class="fa-solid fa-filter"></i> Bộ lọc khóa học
+            </div>
+
+            <!-- Search -->
+            <label>Tìm kiếm</label>
+            <input id="filterSearch" class="form-control" placeholder="Nhập tên khóa học..." />
+
+            <!-- Hạng GPLX -->
+            <label>Hạng GPLX</label>
+            <select id="filterHang" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var h in hangs)
+                {
+                    <option value="@h.IdHang">@h.MaHang - @h.TenDayDu</option>
+                }
+            </select>
+
+            <!-- Ngày học -->
+            <label>Ngày học</label>
+            <input type="date" id="filterNgay" class="form-control" />
+
+            <!-- Phù hợp hồ sơ -->
+            <label class="fw-semibold">Phù hợp hồ sơ</label>
+
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="toggle-wrap">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="filterHoSo">
+                        <span class="toggle-slider"></span>
+                    </div>
+                    <span>Chỉ khóa học phù hợp</span>
+                </div>
+            }
+            else
+            {
+                <a href="Auth/login" class="btn btn-outline-primary w-100 mt-2">
+                    Đăng nhập để lọc theo hồ sơ
+                </a>
+            }
+
+            <!-- Sort -->
+            <label>Sắp xếp theo</label>
+            <select id="filterSort" class="form-select">
+                <option value="">Mặc định</option>
+                <option value="start_desc">Ngày bắt đầu mới nhất</option>
+                <option value="start_asc">Ngày bắt đầu cũ nhất</option>
+                <option value="duration_desc">Thời gian học dài nhất</option>
+                <option value="duration_asc">Thời gian học ngắn nhất</option>
+            </select>
+
+            <!-- Buttons -->
+            <div class="mt-3">
+                <button id="btnReset" class="btn btn-secondary w-100 mb-2">Xóa lọc</button>
+                <button id="btnFilter" class="btn btn-primary w-100">Lọc</button>
+            </div>
+
+        </div>
+
+
+        <!-- ================= COURSE LIST AREA ================= -->
+        <div id="courseList">
+            @Html.Partial("_CourseList", new List<dacn_dtgplx.Models.KhoaHoc>())
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="duplicateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    Cảnh báo đăng ký trùng hạng
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="duplicateMessage" class="mb-3"></p>
+                <small class="text-muted">
+                    Bạn chỉ nên tham gia một khóa học trong cùng hạng GPLX để đảm bảo chất lượng và lịch trình học.
+                </small>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Hủy
+                </button>
+                <a id="confirmRegisterBtn" class="btn btn-primary">
+                    Vẫn tiếp tục đăng ký
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sameCourseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-ban me-2"></i>
+                    Bạn đã đăng ký khóa học này
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="sameCourseMessage" class="mb-3"></p>
+                <small class="text-muted">
+                    Khóa học này đang hoạt động, bạn không thể đăng ký lại lần nữa.
+                </small>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        function loadCourses(page = 1) {
+            const search = document.getElementById("filterSearch").value;
+            const hang = document.getElementById("filterHang").value;
+            const ngay = document.getElementById("filterNgay").value;
+
+            const hoSoEl = document.getElementById("filterHoSo");
+            const onlyHoSo = hoSoEl ? hoSoEl.checked : false;
+
+            const sort = document.getElementById("filterSort").value;
+
+            let url = `/khoahoc/load?page=${page}`;
+            if (search) url += `&search=${search}`;
+            if (hang) url += `&hang=${hang}`;
+            if (ngay) url += `&ngay=${ngay}`;
+            if (onlyHoSo) url += `&onlyHoSo=true`;
+            if (sort) url += `&sort=${sort}`;
+
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("courseList").innerHTML = html;
+                });
+        }
+
+        document.getElementById("btnFilter").onclick = () => loadCourses();
+        document.getElementById("btnReset").onclick = () => {
+            document.getElementById("filterSearch").value = "";
+            document.getElementById("filterHang").value = "";
+            document.getElementById("filterNgay").value = "";
+            if (document.getElementById("filterHoSo"))
+                document.getElementById("filterHoSo").checked = false;
+            document.getElementById("filterSort").value = "";
+            loadCourses();
+        };
+
+        // ⭐ BẮT SỰ KIỆN TOGGLE
+        document.addEventListener("DOMContentLoaded", () => {
+            const hoSoToggle = document.getElementById("filterHoSo");
+            if (hoSoToggle) {
+                hoSoToggle.addEventListener("change", () => loadCourses());
+            }
+        });
+
+        loadCourses();
+
+        // =====================
+        // BẮT SỰ KIỆN CHO NÚT ĐĂNG KÝ (DÙ LÀ HTML TẢI AJAX)
+        // =====================
+        document.addEventListener("click", function (e) {
+
+            const btn = e.target.closest(".btnDangKy"); // tìm đúng nút
+
+            if (!btn) return; // không phải nút đăng ký → bỏ qua
+
+            e.preventDefault();
+
+            const khoaHocId = btn.getAttribute("data-id");
+            const targetUrl = btn.getAttribute("href");
+
+            fetch(`/khoahoc/check-duplicate?khoaHocId=${khoaHocId}`)
+                .then(res => res.json())
+                .then(data => {
+
+                // ❌ 1. Nếu trùng khóa học → không cho đăng ký
+                if (data.exists && data.isSameCourse) {
+
+                    document.getElementById("sameCourseMessage").innerHTML =
+                        `Bạn đã đăng ký khóa học <strong>${data.khoaHoc}</strong> và khóa học này đang hoạt động.<br>
+                            Bạn không thể đăng ký lại.`;
+
+                    new bootstrap.Modal(document.getElementById("sameCourseModal")).show();
+                    return;
+                }
+                // ⚠ 2. Nếu chỉ trùng hạng → cảnh báo có thể tiếp tục
+                if (data.exists && !data.isSameCourse) {
+                document.getElementById("duplicateMessage").innerHTML =
+                    `Bạn đã đăng ký khóa học <strong>${data.khoaHoc}</strong> thuộc hạng
+                        <strong>${data.hang}</strong>.<br>
+                        Bạn có chắc muốn đăng ký thêm khóa này không?`;
+                    document.getElementById("confirmRegisterBtn").href = targetUrl;
+                    new bootstrap.Modal(document.getElementById("duplicateModal")).show();
+                    return;
+                }
+                // ✔ Không trùng → cho đăng ký luôn
+                window.location.href = targetUrl;
+            });
+
+        });
+    </script>
+}

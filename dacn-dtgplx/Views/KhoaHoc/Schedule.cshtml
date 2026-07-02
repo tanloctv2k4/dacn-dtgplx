@@ -1,0 +1,348 @@
+﻿@using System.Globalization
+@model List<dacn_dtgplx.Models.LichHoc>
+
+@{
+    var kh = ViewBag.KhoaHoc;
+    DateTime firstDay = ViewBag.WeekStart;
+    DateTime lastDay = ViewBag.WeekEnd;
+
+    // DTO đưa vào JS
+    var dto = Model.Select(l => new
+    {
+        NgayHoc = l.NgayHoc.ToDateTime(TimeOnly.MinValue).ToString("yyyy/MM/dd"),
+        TgBatDau = l.TgBatDau.ToString("HH:mm"),
+        TgKetThuc = l.TgKetThuc.ToString("HH:mm"),
+        NoiDung = l.NoiDung,
+        DiaDiem = l.DiaDiem
+    });
+}
+
+<style>
+    /* KHUNG NAV TUẦN */
+    .week-nav-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .week-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: #f7f7f7;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+        .week-btn:hover {
+            background: #e2e2e2;
+        }
+
+    /* GRID LỊCH */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: 100px repeat(7, 1fr);
+        border: 1px solid #ddd;
+        background: white;
+    }
+
+    .calendar-cell {
+        border: 1px solid #eee;
+        padding: 4px;
+        min-height: 80px;
+        position: relative;
+        background: white;
+    }
+
+    .header {
+        background: #1e88e5;
+        color: white;
+        padding: 12px 8px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .time-label {
+        background: #5da8e8;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* BLOCK LỊCH */
+    .event-block {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        background: #ffd966;
+        border: 1px solid #e0c778;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 10;
+        box-sizing: border-box;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.4;
+    }
+
+        .event-block:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+            .event-block:hover .event-tooltip {
+                display: block;
+            }
+
+    .event-title {
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+
+    .event-time {
+        font-size: 12px;
+        margin-bottom: 3px;
+    }
+
+    .event-location {
+        font-size: 12px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .event-tooltip {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #333;
+        color: white;
+        padding: 12px;
+        min-width: 250px;
+        border-radius: 6px;
+        font-size: 12px;
+        z-index: 2000;
+        margin-top: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+        .event-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            border: 6px solid transparent;
+            border-bottom-color: #333;
+        }
+
+    .tooltip-row {
+        margin-bottom: 6px;
+    }
+
+        .tooltip-row:last-child {
+            margin-bottom: 0;
+        }
+
+    .tooltip-label {
+        font-weight: 600;
+        margin-right: 4px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- NAV TUẦN -->
+    <div class="week-nav-container">
+        <button class="week-btn" onclick="goToCurrentWeek()">Tuần hiện tại</button>
+        <button class="week-btn" onclick="changeWeek(-1)">&#8249;</button>
+
+        <div class="week-btn" style="cursor:default;">
+            Tuần: @firstDay.ToString("dd/MM/yyyy") - @lastDay.ToString("dd/MM/yyyy")
+        </div>
+
+        <button class="week-btn" onclick="changeWeek(1)">&#8250;</button>
+    </div>
+
+    <!-- CALENDAR GRID -->
+    <div class="calendar-grid" id="calendar">
+        <!-- Header Row -->
+        <div class="calendar-cell header"></div>
+        @for (int d = 0; d < 7; d++)
+        {
+            var day = firstDay.AddDays(d);
+            var dayName = d == 6 ? "Chủ nhật" : $"Thứ {d + 2}";
+            <div class="calendar-cell header">
+                @dayName<br />@day.ToString("dd/MM/yyyy")
+            </div>
+        }
+
+        <!-- Time Slots (12 khung 2 tiếng: 00-02, 02-04, ..., 22-24) -->
+        @for (int slot = 0; slot < 12; slot++)
+        {
+            int startHour = slot * 2;
+            int endHour = startHour + 2;
+
+            <div class="calendar-cell time-label">
+                @string.Format("{0:00}:00 - {1:00}:00", startHour, endHour)
+            </div>
+
+            @for (int d = 0; d < 7; d++)
+            {
+                <div class="calendar-cell" id="cell-@(d)-@(startHour)" data-day="@d" data-hour="@startHour"></div>
+            }
+        }
+    </div>
+
+    <!-- DEBUG -->
+    @* <div style="background:#fff8d6; padding:12px; border:1px solid #e1ca80; margin-top:20px;"> *@
+        @* <b>DEBUG:</b><br> *@
+        @* Số lịch tải được: <b>@Model.Count()</b><br> *@
+        @* Tuần: @firstDay.ToString("dd/MM/yyyy") → @lastDay.ToString("dd/MM/yyyy") *@
+        @* <hr> *@
+        @* <ul> *@
+            @* @foreach (var x in Model) *@
+            @* { *@
+                @* <li> *@
+                    @* Ngày: @x.NgayHoc.ToString("dd/MM/yyyy"), *@
+                    @* Giờ: @x.TgBatDau - @x.TgKetThuc, *@
+                    @* Nội dung: @x.NoiDung, *@
+                    @* Địa điểm: @x.DiaDiem *@
+                @* </li> *@
+            @* } *@
+        @* </ul> *@
+    @* </div>  *@
+
+</div>
+
+<script>
+    console.log("🔵 Script loaded!");
+
+    function changeWeek(offset) {
+        let d = new Date("@firstDay.ToString("yyyy-MM-dd")");
+        d.setDate(d.getDate() + offset * 7);
+
+        window.location.href =
+            `/khoahoc/schedule/@kh.KhoaHocId?weekStart=${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    function goToCurrentWeek() {
+        window.location.href = `/khoahoc/schedule/@kh.KhoaHocId`;
+    }
+
+    function getHour(timeStr) {
+        return parseInt(timeStr.split(":")[0]);
+    }
+
+    function getMinute(timeStr) {
+        return parseInt(timeStr.split(":")[1]);
+    }
+
+    // TRY-CATCH để bắt lỗi
+    try {
+        const eventsJson = '@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(dto))';
+        console.log("🔵 Raw JSON:", eventsJson);
+
+        const events = JSON.parse(eventsJson);
+        console.log("🔵 Parsed events:", events);
+        console.log("🔵 Number of events:", events.length);
+
+        if (!events || events.length === 0) {
+            console.warn("⚠️ No events to display!");
+        }
+
+        // Test: Tạo block test ở Thứ 2, 18:00-20:00
+        // setTimeout(() => {
+        //     const testCell = document.getElementById('cell-0-18');
+        //     console.log("🔵 Test cell-0-18:", testCell);
+
+        //     if (testCell) {
+        //         const testBlock = document.createElement("div");
+        //         testBlock.style.cssText = "position:absolute;top:0;left:4px;right:4px;height:60px;background:red;color:white;padding:8px;border-radius:4px;";
+        //         testBlock.textContent = "TEST BLOCK";
+        //         testCell.appendChild(testBlock);
+        //         console.log("✅ Test block added!");
+        //     } else {
+        //         console.error("❌ Test cell not found!");
+        //     }
+        // }, 500);
+
+        // Render events
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log("🔵 DOM loaded, rendering events...");
+
+            events.forEach((ev, index) => {
+                console.log(`\n--- Event ${index + 1} ---`);
+                console.log("Event data:", ev);
+
+                // Parse ngày
+                let parts = ev.NgayHoc.split("/");
+                let date = new Date(parts[0], parts[1] - 1, parts[2]);
+
+                let jsDay = date.getDay();
+                let dayIndex = jsDay === 0 ? 6 : jsDay - 1;
+
+                console.log("→ Day index:", dayIndex, "(0=T2, 1=T3, ..., 6=CN)");
+
+                // Lấy giờ
+                let startHour = getHour(ev.TgBatDau);
+                let endHour = getHour(ev.TgKetThuc);
+
+                console.log("→ Time: " + startHour + ":00 - " + endHour + ":00");
+
+                // Tìm khung giờ 2h
+                let rowStartHour = Math.floor(startHour / 2) * 2;
+                console.log("→ Row start hour:", rowStartHour);
+
+                // Tìm cell
+                let cellId = `cell-${dayIndex}-${rowStartHour}`;
+                console.log("→ Looking for:", cellId);
+
+                let cell = document.getElementById(cellId);
+                if (!cell) {
+                    console.error("❌ Cell not found:", cellId);
+                    return;
+                }
+
+                console.log("✅ Cell found!");
+
+                // Tạo block
+                let block = document.createElement("div");
+                block.className = "event-block";
+
+                let totalMinutes = (endHour - startHour) * 60;
+                let cellHeight = 80;
+                let offsetMinutes = (startHour - rowStartHour) * 60;
+                let topOffset = (offsetMinutes / 120) * cellHeight;
+                let height = (totalMinutes / 120) * cellHeight;
+
+                block.style.top = topOffset + "px";
+                block.style.height = height + "px";
+
+                block.innerHTML = `
+                    <div class="event-title">${ev.NoiDung}</div>
+                    <div class="event-time">${ev.TgBatDau} - ${ev.TgKetThuc}</div>
+                    <div class="event-location">📍 ${ev.DiaDiem}</div>
+                `;
+
+                cell.appendChild(block);
+                console.log("✅ Block added!");
+            });
+
+            console.log("🎉 Render complete!");
+        });
+
+    } catch (error) {
+        console.error("❌ ERROR:", error);
+    }
+</script>

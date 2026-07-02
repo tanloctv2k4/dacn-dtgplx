@@ -1,0 +1,280 @@
+﻿@model dacn_dtgplx.ViewModels.Reports.DashboardReportVM
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Báo cáo & Thống kê";
+}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <!-- ================================================= -->
+        <!-- ================= FILTER + EXPORT =============== -->
+        <!-- ================================================= -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-filter mr-1"></i> Bộ lọc báo cáo
+                    </h3>
+
+                    <div class="ml-auto">
+                        <button id="btnOpenExportModal"
+                                class="btn btn-danger btn-sm">
+                            <i class="fas fa-file-pdf mr-1"></i> Xuất báo cáo PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form id="filterForm">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="font-weight-bold">Từ ngày</label>
+                            <input type="date"
+                                   class="form-control"
+                                   name="fromDate"
+                                   value="@(Model.Filter.FromDate?.ToString("yyyy-MM-dd") ?? "")" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="font-weight-bold">Đến ngày</label>
+                            <input type="date"
+                                   class="form-control"
+                                   name="toDate"
+                                   value="@(Model.Filter.ToDate?.ToString("yyyy-MM-dd") ?? "")" />
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" type="submit">
+                                <i class="fas fa-search mr-1"></i> Tìm kiếm
+                            </button>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100"
+                                    id="btnReset"
+                                    type="button">
+                                <i class="fas fa-undo mr-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================================================= -->
+        <!-- ====================== TABS ===================== -->
+        <!-- ================================================= -->
+        <div class="card mt-3 shadow-sm">
+            <div class="card-header p-0">
+                <ul class="nav nav-tabs" id="reportTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                           href="javascript:void(0)"
+                           data-tab="overview">
+                            <i class="fas fa-chart-line mr-1"></i> Tổng quan
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="javascript:void(0)"
+                           data-tab="users">
+                            <i class="fas fa-users mr-1"></i> Người dùng
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="javascript:void(0)"
+                           data-tab="courses">
+                            <i class="fas fa-book mr-1"></i> Khóa học
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="javascript:void(0)"
+                           data-tab="tests">
+                            <i class="fas fa-clipboard-check mr-1"></i> Bài thi
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card-body">
+                <div id="tabContent">
+                    @await Html.PartialAsync("~/Views/AdminReport/_TabOverview.cshtml", Model)
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================================================= -->
+<!-- ================== EXPORT MODAL ================= -->
+<!-- ================================================= -->
+@await Html.PartialAsync("~/Views/AdminReport/_ExportPdfModal.cshtml")
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // =====================================================
+        // ================= TAB & FILTER ======================
+        // =====================================================
+
+        let currentTab = "overview";
+
+        // Global chart registry (for PDF export)
+        window.__charts = window.__charts || {};
+
+        function showLoading() {
+            $("#tabContent").html(`
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <div class="mt-2 text-muted">Đang tải dữ liệu...</div>
+                </div>
+            `);
+        }
+
+        function loadTab(tab) {
+            currentTab = tab;
+
+            $("#reportTabs .nav-link").removeClass("active");
+            $(`#reportTabs .nav-link[data-tab='${tab}']`).addClass("active");
+
+            showLoading();
+
+            const query = $("#filterForm").serialize();
+
+            $.get(`/AdminReport/Tab/${tab}?${query}`, function (html) {
+                $("#tabContent").html(html);
+
+                // re-render chart after ajax
+                if (window.__renderTabCharts) {
+                    window.__renderTabCharts();
+                }
+            });
+        }
+
+        function destroyChart(key) {
+            if (window.__charts[key]) {
+                window.__charts[key].destroy();
+                window.__charts[key] = null;
+            }
+        }
+
+        $("#reportTabs .nav-link").click(function () {
+            loadTab($(this).data("tab"));
+        });
+
+        $("#filterForm").submit(function (e) {
+            e.preventDefault();
+            loadTab(currentTab);
+        });
+
+        $("#btnReset").click(function () {
+            $("#filterForm")[0].reset();
+            loadTab(currentTab);
+        });
+
+        $(document).ready(function () {
+            if (window.__renderTabCharts) {
+                window.__renderTabCharts();
+            }
+        });
+
+        // =====================================================
+        // ================= PDF EXPORT ========================
+        // =====================================================
+
+        function buildTimeRangeText() {
+            const fromDate = $("input[name='fromDate']").val();
+            const toDate = $("input[name='toDate']").val();
+
+            if (!fromDate && !toDate) return "Tất cả";
+            return `${fromDate || "Tất cả"} → ${toDate || "Tất cả"}`;
+        }
+
+        $("#btnOpenExportModal").click(function () {
+            $("#exportTimeRange").text(buildTimeRangeText());
+            $("#exportTabName").text($(".nav-link.active").text().trim());
+            $("#exportPdfModal").modal("show");
+        });
+
+        $(document).on("click", "#btnConfirmExportPdf", function () {
+
+        const $btn = $(this);
+        $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Đang xuất...');
+
+        const charts = [];
+
+        try {
+            if (window.__charts) {
+                for (const key in window.__charts) {
+                    const chart = window.__charts[key];
+                    if (!chart || typeof chart.toBase64Image !== "function") continue;
+
+                    // ✅ 1) Skip canvas lỗi / chưa render
+                    if (!chart.canvas || chart.canvas.width === 0 || chart.canvas.height === 0) {
+                        console.warn("Skip empty canvas:", key, chart?.canvas);
+                        continue;
+                    }
+
+                    // ✅ 2) Xuất base64 ổn định hơn
+                    const img64 = chart.toBase64Image("image/png", 0.92);
+
+                    // ✅ 3) Bảo hiểm: base64 phải có "data:image"
+                    if (!img64 || !img64.startsWith("data:image")) {
+                        console.warn("Skip invalid base64:", key, img64?.substring?.(0, 30));
+                        continue;
+                    }
+
+                    charts.push({
+                        name: key,
+                        imageBase64: img64
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Chart export error:", err);
+        }
+
+        const payload = {
+            fromDate: $("input[name='fromDate']").val() || null,
+            toDate: $("input[name='toDate']").val() || null,
+            tab: $(".nav-link.active").data("tab") || "overview",
+            confirmText: $("#txtConfirmText").val(),
+            watermarkText: $("#chkEnableWatermark").is(":checked")
+                ? $("#txtWatermarkText").val()
+                : "",
+            charts: charts
+        };
+
+        console.log("Export payload:", payload); // 🔍 debug
+
+        $.ajax({
+            url: "/AdminReport/ExportPdf",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            xhrFields: { responseType: 'blob' },
+            success: function (blob) {
+                const url = window.URL.createObjectURL(blob);
+                window.open(url);
+                $("#exportPdfModal").modal("hide");
+            },
+            error: function (err) {
+                alert("Xuất PDF thất bại. Vui lòng kiểm tra console.");
+                console.error(err);
+            },
+            complete: function () {
+                $btn.prop("disabled", false).html('<i class="fas fa-file-export mr-1"></i> Xuất PDF');
+            }
+        });
+    });
+    </script>
+}

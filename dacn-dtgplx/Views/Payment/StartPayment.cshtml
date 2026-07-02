@@ -1,0 +1,175 @@
+﻿@model dacn_dtgplx.Models.HoaDonThanhToan
+
+@{
+    var dk = Model.IdDangKyNavigation;
+    var kh = dk.KhoaHoc;
+    var user = dk.HoSo.User;
+}
+
+<div class="container mt-4" style="max-width: 750px;">
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        <h3 class="fw-bold text-primary mb-3">
+            💳 Thanh toán hóa đơn #@Model.IdThanhToan
+        </h3>
+
+        <!-- THÔNG TIN KHÓA HỌC -->
+        <div class="p-3 mb-3 rounded-3" style="background: #f7faff;">
+            <h5 class="fw-bold text-dark">📘 Thông tin khóa học</h5>
+            <hr />
+            <p><strong>Khóa học:</strong> @kh.TenKhoaHoc</p>
+            <p><strong>Hạng GPLX:</strong> @kh.IdHangNavigation.MaHang</p>
+            <p><strong>Học viên:</strong> @user.TenDayDu</p>
+            <p class="text-danger fw-bold">
+                <strong>Số tiền cần thanh toán:</strong> @Model.SoTien?.ToString("N0") VNĐ
+            </p>
+        </div>
+
+        <!-- FORM THANH TOÁN -->
+        <form method="post" asp-action="ChoosePaymentMethod" asp-controller="Payment">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="hoaDonId" value="@Model.IdThanhToan" />
+
+            <h5 class="fw-bold mb-2">📝 Nội dung chuyển khoản</h5>
+            <textarea name="noiDung" class="form-control p-3 rounded-3 mb-4" rows="3">@($"{user.TenDayDu} - Thanh toán khóa học {kh.TenKhoaHoc}")
+            </textarea>
+
+            <h5 class="fw-bold mb-2">💰 Chọn phương thức thanh toán</h5>
+
+            <!-- VNPAY -->
+            <label class="payment-card">
+                <input type="radio" name="method" value="VNPAY" checked />
+
+                <div class="icon-wrap">
+                    <img src="~/images/Logo/vnpay-logo.png" alt="VNPAY" class="payment-logo">
+                </div>
+
+                <div class="text-wrap">
+                    <div class="title">Thanh toán qua VNPAY</div>
+                    <div class="sub">Hỗ trợ quét mã QR & ngân hàng nội địa</div>
+                </div>
+
+                <i class="fa-solid fa-circle-check check-icon"></i>
+            </label>
+
+            <!-- PAYPAL -->
+            <label class="payment-card">
+                <!-- QUAN TRỌNG: thêm name + value, bỏ disabled -->
+                <input type="radio" name="method" value="PAYPAL" />
+
+                <div class="icon-wrap">
+                    <img src="~/images/Logo/paypal-logo.png" alt="PayPal" class="payment-logo">
+                </div>
+
+                <div class="text-wrap">
+                    <div class="title">PayPal</div>
+                    <div class="sub">Thanh toán quốc tế qua PayPal</div>
+                </div>
+
+                <i class="fa-solid fa-circle-check check-icon"></i>
+            </label>
+
+            <!-- MOMO -->
+            <label class="payment-card">
+                <input type="radio" name="method" value="MOMO" />
+
+                <div class="icon-wrap">
+                    <img src="~/images/Logo/momo-logo.png" alt="MOMO" class="payment-logo">
+                </div>
+
+                <div class="text-wrap">
+                    <div class="title">MoMo</div>
+                    <div class="sub">Thanh toán qua ví điện tử MoMo</div>
+                </div>
+
+                <i class="fa-solid fa-circle-check check-icon"></i>
+            </label>
+
+            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mt-3">
+                🚀 Tiến hành thanh toán
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<style>
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    /* CARD */
+    .payment-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border: 2px solid #e7eaf3;
+        border-radius: 16px;
+        background: #fff;
+        cursor: pointer;
+        transition: 0.25s ease;
+        position: relative;
+    }
+
+        .payment-card:hover {
+            border-color: #0d6efd;
+            background: #f4f9ff;
+        }
+
+        /* DISABLED STYLE */
+        .payment-card.disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* RADIO */
+        .payment-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    /* LOGO */
+    .payment-logo {
+        height: 36px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    /* TEXT */
+    .text-wrap .title {
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: #1b1b1b;
+    }
+
+    .text-wrap .sub {
+        font-size: 0.85rem;
+        margin-top: 2px;
+    }
+
+    /* CHECK ICON */
+    .check-icon {
+        margin-left: auto;
+        font-size: 20px;
+        opacity: 0;
+        transition: 0.25s;
+        color: #0d6efd;
+    }
+
+    /* WHEN SELECTED */
+    .payment-card input[type="radio"]:checked + .icon-wrap + .text-wrap + .check-icon {
+        opacity: 1;
+    }
+
+    .payment-card input[type="radio"]:checked ~ .check-icon {
+        opacity: 1;
+    }
+
+    .payment-card input[type="radio"]:checked {
+        border-color: #0d6efd;
+    }
+</style>

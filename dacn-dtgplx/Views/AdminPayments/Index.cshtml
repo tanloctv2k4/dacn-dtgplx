@@ -1,0 +1,74 @@
+﻿@model List<dacn_dtgplx.ViewModels.AdminPaymentViewModel>
+
+<h2 class="mb-4">Quản lý thanh toán</h2>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="bg-secondary text-white">
+        <tr>
+            <th class="text-start">Người thanh toán</th>
+            <th class="text-start">Email</th>
+            <th class="text-start text-nowrap">SĐT</th>
+            <th class="text-start">Loại</th>
+            <th class="text-start">Chi tiết</th>
+            <th class="text-end text-nowrap">Số tiền</th>
+            <th class="text-start text-nowrap">Phương thức</th>
+            <th class="text-center text-nowrap">Ngày</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center text-nowrap">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-start">@item.TenNguoiThanhToan</td>
+                <td class="text-start">@item.Email</td>
+                <td class="text-start text-nowrap">@item.SoDienThoai</td>
+                <td>
+                    <span class="badge @(item.LoaiThanhToan == "Khóa học" ? "bg-primary" : "bg-info") text-nowrap">
+                        @item.LoaiThanhToan
+                    </span>
+                </td>
+                <td class="text-start">
+                    @if (item.LoaiThanhToan == "Khóa học")
+                    {
+                        @item.TenKhoaHoc
+                    }
+                    else
+                    {
+                        @item.XeTapLai
+                    }
+                </td>
+                <td class="text-end text-nowrap">@item.SoTien?.ToString("N0") đ</td>
+                <td class="text-start text-nowrap">@item.PhuongThucThanhToan</td>
+                <td class="text-center text-nowrap">@item.NgayThanhToan?.ToString("dd/MM/yyyy")</td>
+
+                <td class="text-center">
+                    @if (item.TrangThai == true)
+                    {
+                        <span class="badge bg-success">Đã thanh toán</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Chưa thanh toán</span>
+                    }
+                </td>
+                <td class="text-center">
+                    @if (item.TrangThai != true)
+                    {
+                        <form asp-action="Confirm" method="post">
+                            <input type="hidden" name="id" value="@item.IdThanhToan" />
+                            <button class="btn btn-sm btn-primary text-nowrap">
+                                Xác nhận
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
